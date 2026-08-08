@@ -1,0 +1,149 @@
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 100vh;
+}
+
+h1 {
+  margin-top: 0;
+}
+
+.add-row {
+  display: grid;
+  grid-template-columns: 1fr 130px auto;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.add-row input,
+.search,
+.task-item input,
+select {
+  padding: 10px;
+  border: 1px solid #333a4a;
+  border-radius: 8px;
+  background: #161a22;
+  color: #e6e6e6;
+}
+
+button {
+  padding: 8px 12px;
+  border: 1px solid #3a3f4b;
+  border-radius: 8px;
+  background: #202532;
+  color: #e6e6e6;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #2a3040;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+}
+
+.filters .active {
+  border-color: #7c5cff;
+  box-shadow: 0 0 0 1px #7c5cff inset;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.search {
+  min-width: 240px;
+}
+
+.stats {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 12px;
+  opacity: 0.9;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.task-list {
+  padding-left: 20px;
+}
+
+.task-item {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.task-text {
+  min-width: 250px;
+}
+
+.task-text.done {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.status {
+  width: 24px;
+  text-align: center;
+}
+
+.badge {
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  text-transform: capitalize;
+}
+
+.prio-high {
+  background: #3a1f27;
+  border-color: #6b2a3b;
+}
+
+.prio-medium {
+  background: #2e2a1f;
+  border-color: #7c6a2b;
+}
+
+.prio-low {
+  background: #1f2f2a;
+  border-color: #2c6b59;
+}
+
+button.danger {
+  background: #3a1f27;
+  border-color: #6b2a3b;
+}
+
+button.danger:hover {
+  background: #4a2630;
+}
+
+button.danger {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+
+button.danger:hover {
+  background: #b91c1c;
+}
