@@ -88,6 +88,15 @@ button:hover {
   flex-wrap: wrap;
 }
 
+/* FIX: allinea tutti i bottoni nella riga task */
+.task-item button {
+  margin: 0;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .task-text {
   min-width: 250px;
 }
@@ -125,15 +134,7 @@ button:hover {
   border-color: #2c6b59;
 }
 
-button.danger {
-  background: #3a1f27;
-  border-color: #6b2a3b;
-}
-
-button.danger:hover {
-  background: #4a2630;
-}
-
+/* Versione unica di button.danger (rimossa duplicazione) */
 button.danger {
   background: #dc2626;
   color: white;
@@ -141,7 +142,6 @@ button.danger {
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
-  margin-bottom: 12px;
 }
 
 button.danger:hover {
