@@ -139,6 +139,9 @@ export default function App() {
   }
 
   function deleteTask(id) {
+    const ok = window.confirm("Vuoi davvero eliminare questa task?");
+    if (!ok) return;
+
     setTasks((prev) => prev.filter((task) => task.id !== id));
   }
 
