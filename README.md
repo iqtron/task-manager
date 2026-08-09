@@ -6,14 +6,14 @@ Task Manager è una mini app React per organizzare attività personali con prior
 https://task-manager-beta-teal.vercel.app
 
 ## 📸 Screenshot
-![Task Manager preview](public/preview.png)
+![Task Manager preview](public/task-manager-preview.png)
 
 ## 🎬 Demo GIF
 ### Drag & Drop task
 ![Drag and Drop demo](public/gifs/drag-drop.gif)
 
 ### Filtri scadenze
-![Filtri scadenze demo](public/gifs/filtri-scadenze.gif)
+![Filtri scadenze demo](public/gifs/deadline-filters.gif)
 
 ## ✨ Funzionalità
 - Aggiunta di task con titolo e data di scadenza
