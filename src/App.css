@@ -184,6 +184,21 @@ button:hover {
   flex-wrap: wrap;
 }
 
+.reset-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 14px 0 6px;
+}
+
+.reset-actions button {
+  min-width: 150px;
+}
+
+.reset-actions .secondary {
+  opacity: 0.92;
+}
+
 .sort-control {
   position: relative;
 }
@@ -438,6 +453,11 @@ button.danger:hover {
     position: static;
     min-width: 0;
     margin-top: 8px;
+  }
+
+  .reset-actions button {
+    width: 100%;
+    min-width: 0;
   }
 
   .title-with-help {

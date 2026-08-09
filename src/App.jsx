@@ -4,13 +4,107 @@ import TaskList from "./components/TaskList";
 import TaskFilters from "./components/TaskFilters";
 import "./App.css";
 
-const initialTasks = [
-  { id: 1, text: "Studiare React", done: false, priority: "media", dueDate: null },
-  { id: 2, text: "Fare esercizio su useState", done: true, priority: "bassa", dueDate: null },
-];
+function formatDateOffset(daysOffset) {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() + daysOffset);
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function createDemoTasks() {
+  return [
+    {
+      id: 1,
+      text: "Prenotare un appuntamento",
+      done: false,
+      priority: "alta",
+      dueDate: formatDateOffset(-1),
+      order: 0,
+    },
+    {
+      id: 2,
+      text: "Organizzare la spesa della settimana",
+      done: false,
+      priority: "media",
+      dueDate: formatDateOffset(0),
+      order: 1,
+    },
+    {
+      id: 3,
+      text: "Rispondere a un messaggio importante",
+      done: false,
+      priority: "alta",
+      dueDate: formatDateOffset(1),
+      order: 2,
+    },
+    {
+      id: 4,
+      text: "Pagare una bolletta",
+      done: true,
+      priority: "bassa",
+      dueDate: formatDateOffset(4),
+      order: 3,
+    },
+    {
+      id: 5,
+      text: "Sistemare la scrivania",
+      done: false,
+      priority: "bassa",
+      dueDate: null,
+      order: 4,
+    },
+    {
+      id: 6,
+      text: "Ritirare un pacco",
+      done: true,
+      priority: "media",
+      dueDate: null,
+      order: 5,
+    },
+    {
+      id: 7,
+      text: "Chiamare un amico",
+      done: false,
+      priority: "alta",
+      dueDate: formatDateOffset(-3),
+      order: 6,
+    },
+    {
+      id: 8,
+      text: "Comprare un regalo",
+      done: false,
+      priority: "media",
+      dueDate: null,
+      order: 7,
+    },
+    {
+      id: 9,
+      text: "Fare una passeggiata",
+      done: true,
+      priority: "alta",
+      dueDate: formatDateOffset(2),
+      order: 8,
+    },
+    {
+      id: 10,
+      text: "Riordinare i documenti",
+      done: false,
+      priority: "bassa",
+      dueDate: formatDateOffset(6),
+      order: 9,
+    },
+  ];
+}
+
+const demoTasks = createDemoTasks();
 
 function normalizeTasks(value) {
-  if (!Array.isArray(value)) return initialTasks;
+  if (!Array.isArray(value)) return demoTasks;
 
   return value.map((task, index) => ({
     ...task,
@@ -139,9 +233,9 @@ export default function App() {
   const [tasks, setTasks] = useState(() => {
     try {
       const saved = localStorage.getItem("tasks");
-      return saved ? normalizeTasks(JSON.parse(saved)) : initialTasks;
+      return saved ? normalizeTasks(JSON.parse(saved)) : demoTasks;
     } catch {
-      return initialTasks;
+      return demoTasks;
     }
   });
 
@@ -236,10 +330,28 @@ export default function App() {
   }
 
   function resetTasks() {
-    const ok = window.confirm("Vuoi davvero resettare tutte le task?");
+    const ok = window.confirm("Vuoi ripristinare le task demo per il testing?");
     if (!ok) return;
-    setTasks(initialTasks);
+    setTasks(createDemoTasks());
     setFilter("all");
+    setSortMode("manual");
+    setShowSortMenu(false);
+    setShowLegend(false);
+    setQuickMoveSourceId(null);
+    setDraggedTaskId(null);
+  }
+
+  function clearTasks() {
+    const ok = window.confirm("Vuoi svuotare tutte le task e partire da zero?");
+    if (!ok) return;
+
+    setTasks([]);
+    setFilter("all");
+    setSortMode("manual");
+    setShowSortMenu(false);
+    setShowLegend(false);
+    setQuickMoveSourceId(null);
+    setDraggedTaskId(null);
   }
 
   function toggleTheme() {
@@ -445,9 +557,14 @@ export default function App() {
         Totali: <strong>{total}</strong> · Completate: <strong>{completed}</strong> · Da fare: <strong>{todo}</strong>
       </p>
 
-      <button className="danger" onClick={resetTasks}>
-        Reset tasks
-      </button>
+      <div className="reset-actions">
+        <button className="danger" onClick={resetTasks}>
+          Ripristina demo
+        </button>
+        <button className="danger secondary" onClick={clearTasks}>
+          Svuota tutto
+        </button>
+      </div>
 
       {visibleTasks.length === 0 ? (
         <p>Nessuna task da mostrare con il filtro selezionato.</p>
