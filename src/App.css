@@ -133,6 +133,13 @@ button:hover {
   -webkit-overflow-scrolling: touch;
 }
 
+.task-controls-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
 .task-item.dragging {
   opacity: 0.6;
 }
@@ -221,7 +228,9 @@ button:hover {
 .task-item .status,
 .task-item select,
 .task-item button,
-.task-item .drag-hint {
+.task-item .drag-hint,
+.task-item .task-controls-row,
+.task-item .quick-move-target {
   flex: 0 0 auto;
 }
 
@@ -316,8 +325,9 @@ button.danger:hover {
   }
 
   .task-item {
-    flex-wrap: wrap;
-    overflow-x: visible;
+    display: grid;
+    grid-template-columns: 1fr;
+    overflow: hidden;
     white-space: normal;
     cursor: default;
     gap: 8px;
@@ -327,8 +337,17 @@ button.danger:hover {
   }
 
   .task-text {
-    flex: 1 1 100%;
+    grid-row: 1;
     white-space: normal;
+  }
+
+  .task-controls-row {
+    grid-row: 2;
+    overflow-x: auto;
+    white-space: nowrap;
+    width: 100%;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
   }
 
   .drag-hint {
@@ -345,7 +364,7 @@ button.danger:hover {
 
   .quick-move-target {
     display: inline-flex;
-    width: 100%;
-    justify-content: flex-start;
+    width: auto;
+    justify-content: initial;
   }
 }

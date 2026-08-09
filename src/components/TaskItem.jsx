@@ -123,73 +123,74 @@ function TaskItem({ task, index, total, onToggle, onDelete, onEdit, onPriorityCh
           <span className={task.done ? "task-text done" : "task-text"}>
             {task.text}
           </span>
+          <div className="task-controls-row">
+            <span className={`badge ${priorityClass}`}>{task.priority}</span>
+            <span className={`due-date${overdue ? " overdue" : ""}`}>{dueLabel}</span>
+            {dueStatus ? <span className={`due-badge ${dueStatus.className}`}>{dueStatus.label}</span> : null}
+            {overdue && !dueStatus ? <span className="due-badge status-overdue">In ritardo</span> : null}
+            <span className="status">{task.done ? "✅" : "❌"}</span>
 
-          <span className={`badge ${priorityClass}`}>{task.priority}</span>
-          <span className={`due-date${overdue ? " overdue" : ""}`}>{dueLabel}</span>
-          {dueStatus ? <span className={`due-badge ${dueStatus.className}`}>{dueStatus.label}</span> : null}
-          {overdue && !dueStatus ? <span className="due-badge status-overdue">In ritardo</span> : null}
-          <span className="status">{task.done ? "✅" : "❌"}</span>
+            <select
+              value={task.priority}
+              onChange={(e) => onPriorityChange(task.id, e.target.value)}
+              title="Cambia priorità"
+            >
+              <option value="bassa">Bassa</option>
+              <option value="media">Media</option>
+              <option value="alta">Alta</option>
+            </select>
 
-          <select
-            value={task.priority}
-            onChange={(e) => onPriorityChange(task.id, e.target.value)}
-            title="Cambia priorità"
-          >
-            <option value="bassa">Bassa</option>
-            <option value="media">Media</option>
-            <option value="alta">Alta</option>
-          </select>
-
-          <button onClick={() => onToggle(task.id)}>Toggle</button>
-          <span className="drag-hint">⋮⋮</span>
-          <button
-            type="button"
-            className={`quick-move-trigger${isQuickMoveSource ? " quick-move-active" : ""}`}
-            onClick={() => onStartQuickMove?.(task.id)}
-            title="Seleziona task da spostare"
-          >
-            {isQuickMoveSource ? "Sposta: selezionata" : "Sposta"}
-          </button>
-          {isQuickMoveActive && !isQuickMoveSource ? (
-            <div className="quick-move-target" aria-label="Posizione destinazione">
+            <button onClick={() => onToggle(task.id)}>Toggle</button>
+            <span className="drag-hint">⋮⋮</span>
+            <button
+              type="button"
+              className={`quick-move-trigger${isQuickMoveSource ? " quick-move-active" : ""}`}
+              onClick={() => onStartQuickMove?.(task.id)}
+              title="Seleziona task da spostare"
+            >
+              {isQuickMoveSource ? "Sposta: selezionata" : "Sposta"}
+            </button>
+            {isQuickMoveActive && !isQuickMoveSource ? (
+              <div className="quick-move-target" aria-label="Posizione destinazione">
+                <button
+                  type="button"
+                  onClick={() => onPlaceTaskRelative?.(quickMoveSourceId, task.id, "above")}
+                  title="Posiziona sopra questa task"
+                >
+                  Sopra qui
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onPlaceTaskRelative?.(quickMoveSourceId, task.id, "below")}
+                  title="Posiziona sotto questa task"
+                >
+                  Sotto qui
+                </button>
+              </div>
+            ) : null}
+            <div className="move-buttons" aria-label="Riordina task">
               <button
                 type="button"
-                onClick={() => onPlaceTaskRelative?.(quickMoveSourceId, task.id, "above")}
-                title="Posiziona sopra questa task"
+                onClick={() => onMoveTask?.(task.id, "up")}
+                disabled={index === 0}
+                title="Sposta su"
               >
-                Sopra qui
+                ↑
               </button>
               <button
                 type="button"
-                onClick={() => onPlaceTaskRelative?.(quickMoveSourceId, task.id, "below")}
-                title="Posiziona sotto questa task"
+                onClick={() => onMoveTask?.(task.id, "down")}
+                disabled={index === total - 1}
+                title="Sposta giù"
               >
-                Sotto qui
+                ↓
               </button>
             </div>
-          ) : null}
-          <div className="move-buttons" aria-label="Riordina task">
-            <button
-              type="button"
-              onClick={() => onMoveTask?.(task.id, "up")}
-              disabled={index === 0}
-              title="Sposta su"
-            >
-              ↑
-            </button>
-            <button
-              type="button"
-              onClick={() => onMoveTask?.(task.id, "down")}
-              disabled={index === total - 1}
-              title="Sposta giù"
-            >
-              ↓
+            <button onClick={startEdit}>Modifica</button>
+            <button className="danger" onClick={() => onDelete(task.id)}>
+              Elimina
             </button>
           </div>
-          <button onClick={startEdit}>Modifica</button>
-          <button className="danger" onClick={() => onDelete(task.id)}>
-            Elimina
-          </button>
         </>
       )}
     </li>
