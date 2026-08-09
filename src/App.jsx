@@ -241,6 +241,14 @@ export default function App() {
 
   const [filter, setFilter] = useState("all");
   const [showLegend, setShowLegend] = useState(false);
+  const [visualStyle, setVisualStyle] = useState(() => {
+    if (typeof window === "undefined") return "polished";
+
+    const savedVisualStyle = localStorage.getItem("visualStyle");
+    return savedVisualStyle === "classic" || savedVisualStyle === "polished"
+      ? savedVisualStyle
+      : "polished";
+  });
   const [sortMode, setSortMode] = useState(() => {
     if (typeof window === "undefined") return "manual";
 
@@ -272,6 +280,11 @@ export default function App() {
     document.body.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    document.body.setAttribute("data-visual-style", visualStyle);
+    localStorage.setItem("visualStyle", visualStyle);
+  }, [visualStyle]);
 
   useEffect(() => {
     localStorage.setItem("sortMode", sortMode);
@@ -356,6 +369,10 @@ export default function App() {
 
   function toggleTheme() {
     setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark"));
+  }
+
+  function toggleVisualStyle() {
+    setVisualStyle((prevStyle) => (prevStyle === "polished" ? "classic" : "polished"));
   }
 
   function reorderTasks(fromId, toId) {
@@ -510,6 +527,15 @@ export default function App() {
         </div>
 
         <div className="actions">
+          <button
+            type="button"
+            className="action-ghost action-icon"
+            onClick={toggleVisualStyle}
+            aria-label={visualStyle === "polished" ? "Passa alla grafica base" : "Passa alla grafica nuova"}
+            title={visualStyle === "polished" ? "Grafica base" : "Grafica nuova"}
+          >
+            ◐
+          </button>
           <button type="button" className="action-theme" onClick={toggleTheme}>
             {theme === "dark" ? "☀️ Modalità chiara" : "🌙 Modalità scura"}
           </button>
