@@ -1,6 +1,6 @@
 import TaskItem from "./TaskItem";
 
-function TaskList({ tasks, onToggle, onDelete, onEdit, onPriorityChange }) {
+function TaskList({ tasks, onToggle, onDelete, onEdit, onPriorityChange, onReorderTask, onDragStart, draggedTaskId }) {
   if (tasks.length === 0) {
     return <p>Nessuna task da mostrare.</p>;
   }
@@ -15,6 +15,10 @@ function TaskList({ tasks, onToggle, onDelete, onEdit, onPriorityChange }) {
           onDelete={onDelete}
           onEdit={onEdit}
           onPriorityChange={onPriorityChange}
+          onReorderTask={onReorderTask}
+          onDragStart={onDragStart}
+          isDragging={draggedTaskId === task.id}
+          draggedTaskId={draggedTaskId}
         />
       ))}
     </ul>

@@ -9,17 +9,17 @@ function TaskFilters({ filter, setFilter }) {
       </button>
 
       <button
-        className={filter === "active" ? "active" : ""}
-        onClick={() => setFilter("active")}
+        className={filter === "due-soon" ? "active" : ""}
+        onClick={() => setFilter("due-soon")}
       >
-        Da fare
+        In scadenza
       </button>
 
       <button
-        className={filter === "completed" ? "active" : ""}
-        onClick={() => setFilter("completed")}
+        className={filter === "overdue" ? "active" : ""}
+        onClick={() => setFilter("overdue")}
       >
-        Completate
+        Scadute
       </button>
     </div>
   );

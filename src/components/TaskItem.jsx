@@ -1,6 +1,57 @@
 import { useState } from "react";
 
-function TaskItem({ task, onToggle, onDelete, onEdit, onPriorityChange }) {
+function parseDate(value) {
+  if (!value) return null;
+
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) return null;
+
+  return new Date(year, month - 1, day);
+}
+
+function formatDate(value) {
+  const date = parseDate(value);
+  if (!date) return "Nessuna scadenza";
+
+  return new Intl.DateTimeFormat("it-IT", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
+
+function isOverdue(value, done) {
+  if (!value || done) return false;
+
+  const dueDate = parseDate(value);
+  if (!dueDate) return false;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return dueDate < today;
+}
+
+function getDueStatus(value, done) {
+  if (!value || done) return null;
+
+  const dueDate = parseDate(value);
+  if (!dueDate) return null;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  if (dueDate < today) return { label: "In ritardo", className: "status-overdue" };
+  if (dueDate.getTime() === today.getTime()) return { label: "Scade oggi", className: "status-today" };
+  if (dueDate.getTime() === tomorrow.getTime()) return { label: "Scade domani", className: "status-tomorrow" };
+
+  return null;
+}
+
+function TaskItem({ task, onToggle, onDelete, onEdit, onPriorityChange, onReorderTask, onDragStart, isDragging, draggedTaskId }) {
   const [isEditing, setIsEditing] = useState(false);
   const [draftText, setDraftText] = useState(task.text);
 
@@ -28,8 +79,25 @@ function TaskItem({ task, onToggle, onDelete, onEdit, onPriorityChange }) {
       ? "prio-medium"
       : "prio-low";
 
+  const overdue = isOverdue(task.dueDate, task.done);
+  const dueStatus = getDueStatus(task.dueDate, task.done);
+  const dueLabel = task.dueDate ? `Scadenza: ${formatDate(task.dueDate)}` : "Nessuna scadenza";
+
   return (
-    <li className="task-item">
+    <li
+      className={`task-item${overdue ? " overdue" : ""}${isDragging ? " dragging" : ""}`}
+      draggable
+      onDragStart={(event) => {
+        event.dataTransfer.setData("text/plain", String(task.id));
+        onDragStart(task.id);
+      }}
+      onDragOver={(event) => event.preventDefault()}
+      onDrop={(event) => {
+        const sourceId = event.dataTransfer.getData("text/plain");
+        onReorderTask?.(sourceId, task.id);
+      }}
+      onDragEnd={() => onDragStart(null)}
+    >
       {isEditing ? (
         <>
           <input
@@ -47,6 +115,9 @@ function TaskItem({ task, onToggle, onDelete, onEdit, onPriorityChange }) {
           </span>
 
           <span className={`badge ${priorityClass}`}>{task.priority}</span>
+          <span className={`due-date${overdue ? " overdue" : ""}`}>{dueLabel}</span>
+          {dueStatus ? <span className={`due-badge ${dueStatus.className}`}>{dueStatus.label}</span> : null}
+          {overdue && !dueStatus ? <span className="due-badge status-overdue">In ritardo</span> : null}
           <span className="status">{task.done ? "✅" : "❌"}</span>
 
           <select
@@ -60,6 +131,7 @@ function TaskItem({ task, onToggle, onDelete, onEdit, onPriorityChange }) {
           </select>
 
           <button onClick={() => onToggle(task.id)}>Toggle</button>
+          <span className="drag-hint">⋮⋮</span>
           <button onClick={startEdit}>Modifica</button>
           <button className="danger" onClick={() => onDelete(task.id)}>
             Elimina
