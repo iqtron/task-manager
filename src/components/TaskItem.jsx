@@ -54,21 +54,24 @@ function getDueStatus(value, done) {
 function TaskItem({ task, onToggle, onDelete, onEdit, onPriorityChange, onReorderTask, onDragStart, isDragging, draggedTaskId }) {
   const [isEditing, setIsEditing] = useState(false);
   const [draftText, setDraftText] = useState(task.text);
+  const [draftDueDate, setDraftDueDate] = useState(task.dueDate ?? "");
 
   function startEdit() {
     setDraftText(task.text);
+    setDraftDueDate(task.dueDate ?? "");
     setIsEditing(true);
   }
 
   function cancelEdit() {
     setDraftText(task.text);
+    setDraftDueDate(task.dueDate ?? "");
     setIsEditing(false);
   }
 
   function saveEdit() {
     const text = draftText.trim();
     if (!text) return;
-    onEdit(task.id, text);
+    onEdit(task.id, text, draftDueDate);
     setIsEditing(false);
   }
 
@@ -104,6 +107,11 @@ function TaskItem({ task, onToggle, onDelete, onEdit, onPriorityChange, onReorde
             value={draftText}
             onChange={(e) => setDraftText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && saveEdit()}
+          />
+          <input
+            type="date"
+            value={draftDueDate}
+            onChange={(e) => setDraftDueDate(e.target.value)}
           />
           <button onClick={saveEdit}>Salva</button>
           <button onClick={cancelEdit}>Annulla</button>

@@ -142,12 +142,16 @@ export default function App() {
     setTasks((prev) => prev.filter((task) => task.id !== id));
   }
 
-  function editTask(id, newText) {
+  function editTask(id, newText, newDueDate) {
     const clean = newText.trim();
     if (!clean) return;
 
     setTasks((prev) =>
-      prev.map((task) => (task.id === id ? { ...task, text: clean } : task))
+      prev.map((task) =>
+        task.id === id
+          ? { ...task, text: clean, dueDate: newDueDate || null }
+          : task
+      )
     );
   }
 
