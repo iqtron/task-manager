@@ -149,6 +149,26 @@ button:hover {
   gap: 4px;
 }
 
+.quick-move-target {
+  display: none;
+  gap: 4px;
+}
+
+.quick-move-trigger {
+  display: none;
+}
+
+.quick-move-target button {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.quick-move-active {
+  border-color: #7c5cff;
+  box-shadow: 0 0 0 1px #7c5cff inset;
+}
+
 .move-buttons button {
   height: 28px;
   min-width: 28px;
@@ -317,5 +337,15 @@ button.danger:hover {
 
   .move-buttons {
     display: inline-flex;
+  }
+
+  .quick-move-trigger {
+    display: inline-flex;
+  }
+
+  .quick-move-target {
+    display: inline-flex;
+    width: 100%;
+    justify-content: flex-start;
   }
 }

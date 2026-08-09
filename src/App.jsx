@@ -103,6 +103,7 @@ export default function App() {
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   });
   const [draggedTaskId, setDraggedTaskId] = useState(null);
+  const [quickMoveSourceId, setQuickMoveSourceId] = useState(null);
   const importInputRef = useRef(null);
 
   useEffect(() => {
@@ -215,6 +216,38 @@ export default function App() {
     });
   }
 
+  function startQuickMove(id) {
+    setQuickMoveSourceId((prev) => (prev === id ? null : id));
+  }
+
+  function placeTaskRelative(sourceId, targetId, position) {
+    const source = Number(sourceId);
+    const target = Number(targetId);
+
+    if (!source || !target || source === target) return;
+
+    setTasks((prevTasks) => {
+      const ordered = [...prevTasks].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      const sourceIndex = ordered.findIndex((task) => task.id === source);
+      if (sourceIndex < 0) return prevTasks;
+
+      const next = [...ordered];
+      const [moved] = next.splice(sourceIndex, 1);
+
+      const targetIndex = next.findIndex((task) => task.id === target);
+      if (targetIndex < 0) return prevTasks;
+
+      const insertIndex = position === "above" ? targetIndex : targetIndex + 1;
+      next.splice(insertIndex, 0, moved);
+
+      const withOrder = next.map((task, idx) => ({ ...task, order: idx }));
+      const byId = new Map(withOrder.map((task) => [task.id, task]));
+      return prevTasks.map((task) => byId.get(task.id) ?? task);
+    });
+
+    setQuickMoveSourceId(null);
+  }
+
   function exportTasks() {
     const payload = JSON.stringify(tasks, null, 2);
     const blob = new Blob([payload], { type: "application/json" });
@@ -311,6 +344,9 @@ export default function App() {
           onPriorityChange={changePriority}
           onReorderTask={reorderTasks}
           onMoveTask={moveTask}
+          onStartQuickMove={startQuickMove}
+          onPlaceTaskRelative={placeTaskRelative}
+          quickMoveSourceId={quickMoveSourceId}
           onDragStart={setDraggedTaskId}
           draggedTaskId={draggedTaskId}
         />

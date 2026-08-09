@@ -51,7 +51,7 @@ function getDueStatus(value, done) {
   return null;
 }
 
-function TaskItem({ task, index, total, onToggle, onDelete, onEdit, onPriorityChange, onReorderTask, onMoveTask, onDragStart, isDragging, draggedTaskId }) {
+function TaskItem({ task, index, total, onToggle, onDelete, onEdit, onPriorityChange, onReorderTask, onMoveTask, onStartQuickMove, onPlaceTaskRelative, quickMoveSourceId, onDragStart, isDragging, draggedTaskId }) {
   const [isEditing, setIsEditing] = useState(false);
   const [draftText, setDraftText] = useState(task.text);
   const [draftDueDate, setDraftDueDate] = useState(task.dueDate ?? "");
@@ -85,6 +85,8 @@ function TaskItem({ task, index, total, onToggle, onDelete, onEdit, onPriorityCh
   const overdue = isOverdue(task.dueDate, task.done);
   const dueStatus = getDueStatus(task.dueDate, task.done);
   const dueLabel = task.dueDate ? `Scadenza: ${formatDate(task.dueDate)}` : "Nessuna scadenza";
+  const isQuickMoveSource = quickMoveSourceId === task.id;
+  const isQuickMoveActive = quickMoveSourceId !== null;
 
   return (
     <li
@@ -140,6 +142,32 @@ function TaskItem({ task, index, total, onToggle, onDelete, onEdit, onPriorityCh
 
           <button onClick={() => onToggle(task.id)}>Toggle</button>
           <span className="drag-hint">⋮⋮</span>
+          <button
+            type="button"
+            className={`quick-move-trigger${isQuickMoveSource ? " quick-move-active" : ""}`}
+            onClick={() => onStartQuickMove?.(task.id)}
+            title="Seleziona task da spostare"
+          >
+            {isQuickMoveSource ? "Sposta: selezionata" : "Sposta"}
+          </button>
+          {isQuickMoveActive && !isQuickMoveSource ? (
+            <div className="quick-move-target" aria-label="Posizione destinazione">
+              <button
+                type="button"
+                onClick={() => onPlaceTaskRelative?.(quickMoveSourceId, task.id, "above")}
+                title="Posiziona sopra questa task"
+              >
+                Sopra qui
+              </button>
+              <button
+                type="button"
+                onClick={() => onPlaceTaskRelative?.(quickMoveSourceId, task.id, "below")}
+                title="Posiziona sotto questa task"
+              >
+                Sotto qui
+              </button>
+            </div>
+          ) : null}
           <div className="move-buttons" aria-label="Riordina task">
             <button
               type="button"
