@@ -3,7 +3,7 @@ body {
   font-family: Arial, sans-serif;
   background-color: #0f1117;
   color: #e6e6e6;
-  overflow-x: hidden;
+  overflow-x: auto;
 }
 
 body[data-theme="light"] {
@@ -37,7 +37,7 @@ body[data-theme="light"] .task-item.overdue {
   margin: 0 auto;
   padding: 24px;
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-x: visible;
 }
 
 h1 {
@@ -130,9 +130,8 @@ button:hover {
   gap: 6px;
   cursor: grab;
   flex-wrap: nowrap;
-  overflow-x: auto;
+  overflow: visible;
   white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
 }
 
 .task-controls-row {
@@ -140,7 +139,6 @@ button:hover {
   align-items: center;
   gap: 6px;
   flex-wrap: nowrap;
-  max-width: 100%;
 }
 
 .task-item.dragging {
@@ -151,12 +149,6 @@ button:hover {
   cursor: grab;
   color: #8ea3bf;
   user-select: none;
-}
-
-.move-buttons {
-  display: none;
-  align-items: center;
-  gap: 4px;
 }
 
 .quick-move-target {
@@ -177,12 +169,6 @@ button:hover {
 .quick-move-active {
   border-color: #7c5cff;
   box-shadow: 0 0 0 1px #7c5cff inset;
-}
-
-.move-buttons button {
-  height: 28px;
-  min-width: 28px;
-  padding: 0;
 }
 
 .task-item.overdue {
@@ -356,7 +342,7 @@ button.danger:hover {
   .task-item {
     display: grid;
     grid-template-columns: 1fr;
-    overflow: hidden;
+    overflow: visible;
     white-space: normal;
     cursor: default;
     gap: 8px;
@@ -374,19 +360,14 @@ button.danger:hover {
 
   .task-controls-row {
     grid-row: 2;
-    overflow-x: auto;
+    overflow: visible;
     white-space: nowrap;
-    width: 100%;
+    width: max-content;
     padding-bottom: 2px;
-    -webkit-overflow-scrolling: touch;
   }
 
   .drag-hint {
     display: none;
-  }
-
-  .move-buttons {
-    display: inline-flex;
   }
 
   .task-item button.quick-move-trigger {
