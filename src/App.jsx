@@ -197,6 +197,24 @@ export default function App() {
     setDraggedTaskId(null);
   }
 
+  function moveTask(id, direction) {
+    setTasks((prevTasks) => {
+      const ordered = [...prevTasks].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      const index = ordered.findIndex((task) => task.id === id);
+      if (index < 0) return prevTasks;
+
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= ordered.length) return prevTasks;
+
+      const next = [...ordered];
+      [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
+      const withOrder = next.map((task, idx) => ({ ...task, order: idx }));
+
+      const byId = new Map(withOrder.map((task) => [task.id, task]));
+      return prevTasks.map((task) => byId.get(task.id) ?? task);
+    });
+  }
+
   function exportTasks() {
     const payload = JSON.stringify(tasks, null, 2);
     const blob = new Blob([payload], { type: "application/json" });
@@ -292,6 +310,7 @@ export default function App() {
           onEdit={editTask}
           onPriorityChange={changePriority}
           onReorderTask={reorderTasks}
+          onMoveTask={moveTask}
           onDragStart={setDraggedTaskId}
           draggedTaskId={draggedTaskId}
         />

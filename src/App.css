@@ -130,6 +130,7 @@ button:hover {
   flex-wrap: nowrap;
   overflow-x: auto;
   white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
 }
 
 .task-item.dragging {
@@ -140,6 +141,18 @@ button:hover {
   cursor: grab;
   color: #8ea3bf;
   user-select: none;
+}
+
+.move-buttons {
+  display: none;
+  align-items: center;
+  gap: 4px;
+}
+
+.move-buttons button {
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
 }
 
 .task-item.overdue {
@@ -252,4 +265,57 @@ button.danger {
 
 button.danger:hover {
   background: #b91c1c;
+}
+
+@media (max-width: 768px) {
+  .app {
+    padding: 14px;
+  }
+
+  .top-bar {
+    align-items: flex-start;
+  }
+
+  .add-row {
+    grid-template-columns: 1fr;
+  }
+
+  .add-row button {
+    width: 100%;
+  }
+
+  .filters {
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .task-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+  }
+
+  .task-item {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    white-space: normal;
+    cursor: default;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid #2c3444;
+    border-radius: 10px;
+  }
+
+  .task-text {
+    flex: 1 1 100%;
+    white-space: normal;
+  }
+
+  .drag-hint {
+    display: none;
+  }
+
+  .move-buttons {
+    display: inline-flex;
+  }
 }

@@ -51,7 +51,7 @@ function getDueStatus(value, done) {
   return null;
 }
 
-function TaskItem({ task, onToggle, onDelete, onEdit, onPriorityChange, onReorderTask, onDragStart, isDragging, draggedTaskId }) {
+function TaskItem({ task, index, total, onToggle, onDelete, onEdit, onPriorityChange, onReorderTask, onMoveTask, onDragStart, isDragging, draggedTaskId }) {
   const [isEditing, setIsEditing] = useState(false);
   const [draftText, setDraftText] = useState(task.text);
   const [draftDueDate, setDraftDueDate] = useState(task.dueDate ?? "");
@@ -140,6 +140,24 @@ function TaskItem({ task, onToggle, onDelete, onEdit, onPriorityChange, onReorde
 
           <button onClick={() => onToggle(task.id)}>Toggle</button>
           <span className="drag-hint">⋮⋮</span>
+          <div className="move-buttons" aria-label="Riordina task">
+            <button
+              type="button"
+              onClick={() => onMoveTask?.(task.id, "up")}
+              disabled={index === 0}
+              title="Sposta su"
+            >
+              ↑
+            </button>
+            <button
+              type="button"
+              onClick={() => onMoveTask?.(task.id, "down")}
+              disabled={index === total - 1}
+              title="Sposta giù"
+            >
+              ↓
+            </button>
+          </div>
           <button onClick={startEdit}>Modifica</button>
           <button className="danger" onClick={() => onDelete(task.id)}>
             Elimina
