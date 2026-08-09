@@ -3,6 +3,7 @@ body {
   font-family: Arial, sans-serif;
   background-color: #0f1117;
   color: #e6e6e6;
+  overflow-x: hidden;
 }
 
 body[data-theme="light"] {
@@ -36,6 +37,7 @@ body[data-theme="light"] .task-item.overdue {
   margin: 0 auto;
   padding: 24px;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 h1 {
@@ -138,6 +140,7 @@ button:hover {
   align-items: center;
   gap: 6px;
   flex-wrap: nowrap;
+  max-width: 100%;
 }
 
 .task-item.dragging {
@@ -196,6 +199,16 @@ button:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.status-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.status-toggle:focus-visible {
+  outline: 2px solid #7c5cff;
+  outline-offset: 2px;
 }
 
 .task-text {
@@ -267,6 +280,22 @@ button:hover {
   text-transform: capitalize;
 }
 
+.priority-picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.priority-picker select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
 .prio-high {
   background: #3a1f27;
   border-color: #6b2a3b;
@@ -334,11 +363,13 @@ button.danger:hover {
     padding: 10px;
     border: 1px solid #2c3444;
     border-radius: 10px;
+    min-width: 0;
   }
 
   .task-text {
     grid-row: 1;
     white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .task-controls-row {

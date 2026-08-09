@@ -124,23 +124,37 @@ function TaskItem({ task, index, total, onToggle, onDelete, onEdit, onPriorityCh
             {task.text}
           </span>
           <div className="task-controls-row">
-            <span className={`badge ${priorityClass}`}>{task.priority}</span>
+            <label className={`priority-picker badge ${priorityClass}`} title="Cambia priorità">
+              {task.priority}
+              <select
+                value={task.priority}
+                onChange={(e) => onPriorityChange(task.id, e.target.value)}
+                aria-label="Cambia priorità"
+              >
+                <option value="bassa">Bassa</option>
+                <option value="media">Media</option>
+                <option value="alta">Alta</option>
+              </select>
+            </label>
             <span className={`due-date${overdue ? " overdue" : ""}`}>{dueLabel}</span>
             {dueStatus ? <span className={`due-badge ${dueStatus.className}`}>{dueStatus.label}</span> : null}
             {overdue && !dueStatus ? <span className="due-badge status-overdue">In ritardo</span> : null}
-            <span className="status">{task.done ? "✅" : "❌"}</span>
-
-            <select
-              value={task.priority}
-              onChange={(e) => onPriorityChange(task.id, e.target.value)}
-              title="Cambia priorità"
+            <span
+              className="status status-toggle"
+              onClick={() => onToggle(task.id)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onToggle(task.id);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              title="Segna come completata o da fare"
             >
-              <option value="bassa">Bassa</option>
-              <option value="media">Media</option>
-              <option value="alta">Alta</option>
-            </select>
+              {task.done ? "✅" : "❌"}
+            </span>
 
-            <button onClick={() => onToggle(task.id)}>Toggle</button>
             <span className="drag-hint">⋮⋮</span>
             <button
               type="button"
