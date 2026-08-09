@@ -51,7 +51,7 @@ function getDueStatus(value, done) {
   return null;
 }
 
-function TaskItem({ task, onToggle, onDelete, onEdit, onPriorityChange, onReorderTask, onStartQuickMove, onPlaceTaskRelative, quickMoveSourceId, onDragStart, isDragging, draggedTaskId }) {
+function TaskItem({ task, onToggle, onDelete, onEdit, onPriorityChange, onReorderTask, onStartQuickMove, onPlaceTaskRelative, quickMoveSourceId, onDragStart, isDragging, draggedTaskId, isManualSort }) {
   const [isEditing, setIsEditing] = useState(false);
   const [draftText, setDraftText] = useState(task.text);
   const [draftDueDate, setDraftDueDate] = useState(task.dueDate ?? "");
@@ -91,17 +91,25 @@ function TaskItem({ task, onToggle, onDelete, onEdit, onPriorityChange, onReorde
   return (
     <li
       className={`task-item${overdue ? " overdue" : ""}${isDragging ? " dragging" : ""}`}
-      draggable
+      draggable={isManualSort}
       onDragStart={(event) => {
+        if (!isManualSort) return;
         event.dataTransfer.setData("text/plain", String(task.id));
         onDragStart(task.id);
       }}
-      onDragOver={(event) => event.preventDefault()}
+      onDragOver={(event) => {
+        if (!isManualSort) return;
+        event.preventDefault();
+      }}
       onDrop={(event) => {
+        if (!isManualSort) return;
         const sourceId = event.dataTransfer.getData("text/plain");
         onReorderTask?.(sourceId, task.id);
       }}
-      onDragEnd={() => onDragStart(null)}
+      onDragEnd={() => {
+        if (!isManualSort) return;
+        onDragStart(null);
+      }}
     >
       {isEditing ? (
         <>
@@ -155,32 +163,36 @@ function TaskItem({ task, onToggle, onDelete, onEdit, onPriorityChange, onReorde
               {task.done ? "✅" : "❌"}
             </span>
 
-            <span className="drag-hint">⋮⋮</span>
-            <button
-              type="button"
-              className={`quick-move-trigger${isQuickMoveSource ? " quick-move-active" : ""}`}
-              onClick={() => onStartQuickMove?.(task.id)}
-              title="Seleziona task da spostare"
-            >
-              {isQuickMoveSource ? "Sposta: selezionata" : "Sposta"}
-            </button>
-            {isQuickMoveActive && !isQuickMoveSource ? (
-              <div className="quick-move-target" aria-label="Posizione destinazione">
+            {isManualSort ? (
+              <>
+                <span className="drag-hint">⋮⋮</span>
                 <button
                   type="button"
-                  onClick={() => onPlaceTaskRelative?.(quickMoveSourceId, task.id, "above")}
-                  title="Posiziona sopra questa task"
+                  className={`quick-move-trigger${isQuickMoveSource ? " quick-move-active" : ""}`}
+                  onClick={() => onStartQuickMove?.(task.id)}
+                  title="Seleziona task da spostare"
                 >
-                  Sopra qui
+                  {isQuickMoveSource ? "Sposta: selezionata" : "Sposta"}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => onPlaceTaskRelative?.(quickMoveSourceId, task.id, "below")}
-                  title="Posiziona sotto questa task"
-                >
-                  Sotto qui
-                </button>
-              </div>
+                {isQuickMoveActive && !isQuickMoveSource ? (
+                  <div className="quick-move-target" aria-label="Posizione destinazione">
+                    <button
+                      type="button"
+                      onClick={() => onPlaceTaskRelative?.(quickMoveSourceId, task.id, "above")}
+                      title="Posiziona sopra questa task"
+                    >
+                      Sopra qui
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onPlaceTaskRelative?.(quickMoveSourceId, task.id, "below")}
+                      title="Posiziona sotto questa task"
+                    >
+                      Sotto qui
+                    </button>
+                  </div>
+                ) : null}
+              </>
             ) : null}
             <button onClick={startEdit}>Modifica</button>
             <button className="danger" onClick={() => onDelete(task.id)}>

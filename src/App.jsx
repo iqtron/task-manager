@@ -55,29 +55,83 @@ function isDueSoon(value, done) {
   return dueDate >= today && dueDate <= weekLater;
 }
 
-function sortTasks(tasks) {
-  return [...tasks].sort((a, b) => {
-    const aHasManualOrder = typeof a.order === "number";
-    const bHasManualOrder = typeof b.order === "number";
+function getPriorityRank(priority) {
+  if (priority === "alta") return 0;
+  if (priority === "media") return 1;
+  return 2;
+}
 
-    if (aHasManualOrder || bHasManualOrder) {
-      const aOrder = aHasManualOrder ? a.order : 0;
-      const bOrder = bHasManualOrder ? b.order : 0;
-      return aOrder - bOrder;
+function getDueRank(task) {
+  if (!task.dueDate || task.done) return 4;
+  if (isOverdue(task.dueDate, task.done)) return 0;
+
+  const dueDate = parseDate(task.dueDate);
+  if (!dueDate) return 4;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  if (dueDate.getTime() === today.getTime()) return 1;
+  if (dueDate.getTime() === tomorrow.getTime()) return 2;
+  if (isDueSoon(task.dueDate, task.done)) return 3;
+  return 4;
+}
+
+function sortTasks(tasks, mode) {
+  const compareByManualOrder = (a, b) => (a.order ?? 0) - (b.order ?? 0) || a.id - b.id;
+
+  if (mode === "manual") {
+    return [...tasks].sort(compareByManualOrder);
+  }
+
+  return [...tasks].sort((a, b) => {
+    const aDone = a.done ? 1 : 0;
+    const bDone = b.done ? 1 : 0;
+
+    if (aDone !== bDone) return aDone - bDone;
+
+    if (mode === "priority") {
+      const priorityDiff = getPriorityRank(a.priority) - getPriorityRank(b.priority);
+      if (priorityDiff !== 0) return priorityDiff;
+
+      const dueDiff = getDueRank(a) - getDueRank(b);
+      if (dueDiff !== 0) return dueDiff;
+
+      const dateA = a.dueDate ? parseDate(a.dueDate)?.getTime() ?? Number.POSITIVE_INFINITY : Number.POSITIVE_INFINITY;
+      const dateB = b.dueDate ? parseDate(b.dueDate)?.getTime() ?? Number.POSITIVE_INFINITY : Number.POSITIVE_INFINITY;
+      if (dateA !== dateB) return dateA - dateB;
+
+      return compareByManualOrder(a, b);
     }
 
-    const aOverdue = isOverdue(a.dueDate, a.done);
-    const bOverdue = isOverdue(b.dueDate, b.done);
+    if (mode === "due") {
+      const dueDiff = getDueRank(a) - getDueRank(b);
+      if (dueDiff !== 0) return dueDiff;
 
-    if (aOverdue && !bOverdue) return -1;
-    if (!aOverdue && bOverdue) return 1;
+      const dateA = a.dueDate ? parseDate(a.dueDate)?.getTime() ?? Number.POSITIVE_INFINITY : Number.POSITIVE_INFINITY;
+      const dateB = b.dueDate ? parseDate(b.dueDate)?.getTime() ?? Number.POSITIVE_INFINITY : Number.POSITIVE_INFINITY;
+      if (dateA !== dateB) return dateA - dateB;
 
-    if (!a.dueDate && b.dueDate) return 1;
-    if (a.dueDate && !b.dueDate) return -1;
+      const priorityDiff = getPriorityRank(a.priority) - getPriorityRank(b.priority);
+      if (priorityDiff !== 0) return priorityDiff;
 
-    if (!a.dueDate && !b.dueDate) return 0;
+      return compareByManualOrder(a, b);
+    }
 
-    return parseDate(a.dueDate) - parseDate(b.dueDate);
+    const urgencyDiff = getDueRank(a) - getDueRank(b);
+    if (urgencyDiff !== 0) return urgencyDiff;
+
+    const priorityDiff = getPriorityRank(a.priority) - getPriorityRank(b.priority);
+    if (priorityDiff !== 0) return priorityDiff;
+
+    const dateA = a.dueDate ? parseDate(a.dueDate)?.getTime() ?? Number.POSITIVE_INFINITY : Number.POSITIVE_INFINITY;
+    const dateB = b.dueDate ? parseDate(b.dueDate)?.getTime() ?? Number.POSITIVE_INFINITY : Number.POSITIVE_INFINITY;
+    if (dateA !== dateB) return dateA - dateB;
+
+    return compareByManualOrder(a, b);
   });
 }
 
@@ -92,6 +146,16 @@ export default function App() {
   });
 
   const [filter, setFilter] = useState("all");
+  const [showLegend, setShowLegend] = useState(false);
+  const [sortMode, setSortMode] = useState(() => {
+    if (typeof window === "undefined") return "manual";
+
+    const savedSortMode = localStorage.getItem("sortMode");
+    return savedSortMode === "manual" || savedSortMode === "priority" || savedSortMode === "due" || savedSortMode === "urgency"
+      ? savedSortMode
+      : "manual";
+  });
+  const [showSortMenu, setShowSortMenu] = useState(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") return "dark";
 
@@ -114,6 +178,10 @@ export default function App() {
     document.body.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem("sortMode", sortMode);
+  }, [sortMode]);
 
   function addTask(text, dueDate) {
     const clean = text.trim();
@@ -184,6 +252,8 @@ export default function App() {
 
     if (!sourceId || !targetId || sourceId === targetId) return;
 
+    setSortMode("manual");
+
     setTasks((prevTasks) => {
       const sourceIndex = prevTasks.findIndex((task) => task.id === sourceId);
       const targetIndex = prevTasks.findIndex((task) => task.id === targetId);
@@ -207,6 +277,8 @@ export default function App() {
     const target = Number(targetId);
 
     if (!source || !target || source === target) return;
+
+    setSortMode("manual");
 
     setTasks((prevTasks) => {
       const ordered = [...prevTasks].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -277,8 +349,20 @@ export default function App() {
         break;
     }
 
-    return sortTasks(filteredTasks);
-  }, [tasks, filter]);
+    return sortTasks(filteredTasks, sortMode);
+  }, [tasks, filter, sortMode]);
+
+  const sortLabels = {
+    manual: "Manuale",
+    urgency: "Urgenza",
+    priority: "Priorità",
+    due: "Scadenza",
+  };
+
+  function applySortMode(mode) {
+    setSortMode(mode);
+    setShowSortMenu(false);
+  }
 
   const total = tasks.length;
   const completed = tasks.filter((task) => task.done).length;
@@ -287,7 +371,28 @@ export default function App() {
   return (
     <main className="app">
       <div className="top-bar">
-        <h1>Task Manager</h1>
+        <div className="title-with-help">
+          <h1>Task Manager</h1>
+          <button
+            type="button"
+            className="help-icon"
+            onClick={() => setShowLegend((prev) => !prev)}
+            aria-label="Mostra legenda"
+            aria-expanded={showLegend}
+            title="Mostra legenda"
+          >
+            ?
+          </button>
+          <div className={`help-popover${showLegend ? " open" : ""}`} role="status" aria-live="polite">
+            <strong>Legenda</strong>
+            <span>
+              • Tocca il <span className="legend-inline-badge badge prio-medium">badge</span> per cambiare priorità
+            </span>
+            <span>• Tocca ✅/❌ per cambiare stato</span>
+            <span>• Su mobile: Sposta → Sopra/Sotto</span>
+            <span>• Su desktop: trascina per riordinare</span>
+          </div>
+        </div>
 
         <div className="actions">
           <button type="button" onClick={toggleTheme}>
@@ -305,7 +410,36 @@ export default function App() {
 
       <TaskForm onAddTask={addTask} />
 
-      <TaskFilters filter={filter} setFilter={setFilter} />
+      <div className="view-bar">
+        <TaskFilters filter={filter} setFilter={setFilter} />
+
+        <div className="sort-control">
+          <button
+            type="button"
+            onClick={() => setShowSortMenu((prev) => !prev)}
+            aria-haspopup="menu"
+            aria-expanded={showSortMenu}
+          >
+            Ordina: {sortLabels[sortMode]}
+          </button>
+          {showSortMenu ? (
+            <div className="sort-menu" role="menu" aria-label="Scegli ordinamento">
+              <button type="button" className={sortMode === "manual" ? "active" : ""} onClick={() => applySortMode("manual")}>
+                Manuale
+              </button>
+              <button type="button" className={sortMode === "urgency" ? "active" : ""} onClick={() => applySortMode("urgency")}>
+                Urgenza
+              </button>
+              <button type="button" className={sortMode === "priority" ? "active" : ""} onClick={() => applySortMode("priority")}>
+                Priorità
+              </button>
+              <button type="button" className={sortMode === "due" ? "active" : ""} onClick={() => applySortMode("due")}>
+                Scadenza
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </div>
 
       <p>
         Totali: <strong>{total}</strong> · Completate: <strong>{completed}</strong> · Da fare: <strong>{todo}</strong>
@@ -330,6 +464,7 @@ export default function App() {
           quickMoveSourceId={quickMoveSourceId}
           onDragStart={setDraggedTaskId}
           draggedTaskId={draggedTaskId}
+          isManualSort={sortMode === "manual"}
         />
       )}
     </main>

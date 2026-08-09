@@ -1,12 +1,15 @@
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import TaskItem from "./TaskItem";
 
-function TaskList({ tasks, onToggle, onDelete, onEdit, onPriorityChange, onReorderTask, onStartQuickMove, onPlaceTaskRelative, quickMoveSourceId, onDragStart, draggedTaskId }) {
+function TaskList({ tasks, onToggle, onDelete, onEdit, onPriorityChange, onReorderTask, onStartQuickMove, onPlaceTaskRelative, quickMoveSourceId, onDragStart, draggedTaskId, isManualSort }) {
+  const [listRef] = useAutoAnimate({ duration: 220, easing: "ease-in-out" });
+
   if (tasks.length === 0) {
     return <p>Nessuna task da mostrare.</p>;
   }
 
   return (
-    <ul className="task-list">
+    <ul ref={listRef} className="task-list">
       {tasks.map((task) => (
         <TaskItem
           key={task.id}
@@ -22,6 +25,7 @@ function TaskList({ tasks, onToggle, onDelete, onEdit, onPriorityChange, onReord
           onDragStart={onDragStart}
           isDragging={draggedTaskId === task.id}
           draggedTaskId={draggedTaskId}
+          isManualSort={isManualSort}
         />
       ))}
     </ul>
