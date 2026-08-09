@@ -24,7 +24,7 @@ export default function TaskForm({ onAddTask }) {
         value={dueDate}
         onChange={(e) => setDueDate(e.target.value)}
       />
-      <button type="submit">Aggiungi</button>
+      <button type="submit" className="add-button">Aggiungi</button>
     </form>
   );
 }

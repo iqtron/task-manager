@@ -484,7 +484,10 @@ export default function App() {
     <main className="app">
       <div className="top-bar">
         <div className="title-with-help">
-          <h1>Task Manager</h1>
+          <div className="title-block">
+            <h1>Task Manager</h1>
+            <p className="title-subtitle">Organizza, ordina e completa con priorita e scadenze.</p>
+          </div>
           <button
             type="button"
             className="help-icon"
@@ -507,13 +510,13 @@ export default function App() {
         </div>
 
         <div className="actions">
-          <button type="button" onClick={toggleTheme}>
+          <button type="button" className="action-theme" onClick={toggleTheme}>
             {theme === "dark" ? "☀️ Modalità chiara" : "🌙 Modalità scura"}
           </button>
-          <button type="button" onClick={exportTasks}>
+          <button type="button" className="action-ghost" onClick={exportTasks}>
             Esporta JSON
           </button>
-          <button type="button" onClick={() => importInputRef.current?.click()}>
+          <button type="button" className="action-ghost" onClick={() => importInputRef.current?.click()}>
             Importa JSON
           </button>
           <input ref={importInputRef} type="file" accept="application/json" onChange={importTasks} hidden />
@@ -553,7 +556,7 @@ export default function App() {
         </div>
       </div>
 
-      <p>
+      <p className="stats-line">
         Totali: <strong>{total}</strong> · Completate: <strong>{completed}</strong> · Da fare: <strong>{todo}</strong>
       </p>
 
@@ -567,7 +570,21 @@ export default function App() {
       </div>
 
       {visibleTasks.length === 0 ? (
-        <p>Nessuna task da mostrare con il filtro selezionato.</p>
+        <div className="empty-state" role="status" aria-live="polite">
+          <h2>{total === 0 ? "Nessuna task presente" : "Nessuna task con questo filtro"}</h2>
+          <p>
+            {total === 0
+              ? "Inizia aggiungendo la prima task oppure ripristina una demo di esempio."
+              : "Prova a cambiare filtro o riporta la vista su Tutte per vedere di nuovo la lista."}
+          </p>
+          <div className="empty-actions">
+            {total === 0 ? (
+              <button type="button" onClick={resetTasks}>Ripristina demo</button>
+            ) : (
+              <button type="button" onClick={() => setFilter("all")}>Mostra tutte</button>
+            )}
+          </div>
+        </div>
       ) : (
         <TaskList
           tasks={visibleTasks}
