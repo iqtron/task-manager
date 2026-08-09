@@ -154,7 +154,7 @@ button:hover {
   gap: 4px;
 }
 
-.quick-move-trigger {
+.task-item button.quick-move-trigger {
   display: none;
 }
 
@@ -339,7 +339,7 @@ button.danger:hover {
     display: inline-flex;
   }
 
-  .quick-move-trigger {
+  .task-item button.quick-move-trigger {
     display: inline-flex;
   }
 
