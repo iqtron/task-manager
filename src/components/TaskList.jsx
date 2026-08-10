@@ -1,6 +1,7 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import TaskItem from "./TaskItem";
 
+// Wrapper della lista che aggiunge un effetto di animazione quando le task cambiano posizione.
 function TaskList({ tasks, onToggle, onDelete, onEdit, onPriorityChange, onReorderTask, onStartQuickMove, onPlaceTaskRelative, quickMoveSourceId, onDragStart, draggedTaskId, isManualSort }) {
   const [listRef] = useAutoAnimate({ duration: 220, easing: "ease-in-out" });
 
@@ -24,7 +25,6 @@ function TaskList({ tasks, onToggle, onDelete, onEdit, onPriorityChange, onReord
           quickMoveSourceId={quickMoveSourceId}
           onDragStart={onDragStart}
           isDragging={draggedTaskId === task.id}
-          draggedTaskId={draggedTaskId}
           isManualSort={isManualSort}
         />
       ))}

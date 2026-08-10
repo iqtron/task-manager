@@ -4,9 +4,15 @@ import TaskList from "./components/TaskList";
 import TaskFilters from "./components/TaskFilters";
 import "./App.css";
 
+// Helper condiviso per lavorare sempre con la data di oggi senza ore/minuti/secondi.
+function getStartOfToday() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
+
 function formatDateOffset(daysOffset) {
-  const date = new Date();
-  date.setHours(0, 0, 0, 0);
+  const date = getStartOfToday();
   date.setDate(date.getDate() + daysOffset);
 
   const year = date.getFullYear();
@@ -16,6 +22,7 @@ function formatDateOffset(daysOffset) {
   return `${year}-${month}-${day}`;
 }
 
+// Crea una lista di esempio con priorità, scadenze e stato iniziale.
 function createDemoTasks() {
   return [
     {
@@ -103,6 +110,7 @@ function createDemoTasks() {
 
 const demoTasks = createDemoTasks();
 
+// Assicura che i dati caricati da localStorage abbiano sempre la forma attesa.
 function normalizeTasks(value) {
   if (!Array.isArray(value)) return demoTasks;
 
@@ -113,6 +121,7 @@ function normalizeTasks(value) {
   }));
 }
 
+// Trasforma una stringa YYYY-MM-DD in un oggetto Date leggibile.
 function parseDate(value) {
   if (!value) return null;
 
@@ -122,26 +131,26 @@ function parseDate(value) {
   return new Date(year, month - 1, day);
 }
 
+// Indica se una task è scaduta e ancora da completare.
 function isOverdue(value, done) {
   if (!value || done) return false;
 
   const dueDate = parseDate(value);
   if (!dueDate) return false;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getStartOfToday();
 
   return dueDate < today;
 }
 
+// Indica se una task è in scadenza entro una settimana.
 function isDueSoon(value, done) {
   if (!value || done) return false;
 
   const dueDate = parseDate(value);
   if (!dueDate) return false;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getStartOfToday();
 
   const weekLater = new Date(today);
   weekLater.setDate(today.getDate() + 7);
@@ -149,12 +158,14 @@ function isDueSoon(value, done) {
   return dueDate >= today && dueDate <= weekLater;
 }
 
+// Assegna un valore numerico alle priorità per ordinare in modo semplice.
 function getPriorityRank(priority) {
   if (priority === "alta") return 0;
   if (priority === "media") return 1;
   return 2;
 }
 
+// Assegna un livello di urgenza in base alla scadenza della task.
 function getDueRank(task) {
   if (!task.dueDate || task.done) return 4;
   if (isOverdue(task.dueDate, task.done)) return 0;
@@ -162,8 +173,7 @@ function getDueRank(task) {
   const dueDate = parseDate(task.dueDate);
   if (!dueDate) return 4;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getStartOfToday();
 
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
@@ -174,6 +184,7 @@ function getDueRank(task) {
   return 4;
 }
 
+// Ordina le task in base al metodo selezionato: manuale, priorità o scadenza.
 function sortTasks(tasks, mode) {
   const compareByManualOrder = (a, b) => (a.order ?? 0) - (b.order ?? 0) || a.id - b.id;
 
@@ -229,7 +240,9 @@ function sortTasks(tasks, mode) {
   });
 }
 
+// Componente principale: contiene stato, filtri, ordinamento e azioni globali.
 export default function App() {
+  // Carica le task salvate nel browser, oppure usa il demo iniziale.
   const [tasks, setTasks] = useState(() => {
     try {
       const saved = localStorage.getItem("tasks");
@@ -239,16 +252,11 @@ export default function App() {
     }
   });
 
+  // Gestisce il filtro visibile nella lista.
   const [filter, setFilter] = useState("all");
+  // Mostra o nasconde la legenda informativa dell'interfaccia.
   const [showLegend, setShowLegend] = useState(false);
-  const [visualStyle, setVisualStyle] = useState(() => {
-    if (typeof window === "undefined") return "polished";
-
-    const savedVisualStyle = localStorage.getItem("visualStyle");
-    return savedVisualStyle === "classic" || savedVisualStyle === "polished"
-      ? savedVisualStyle
-      : "polished";
-  });
+  // Memorizza il metodo di ordinamento corrente.
   const [sortMode, setSortMode] = useState(() => {
     if (typeof window === "undefined") return "manual";
 
@@ -257,7 +265,9 @@ export default function App() {
       ? savedSortMode
       : "manual";
   });
+  // Controlla se il menu di ordinamento è aperto.
   const [showSortMenu, setShowSortMenu] = useState(false);
+  // Gestisce il tema chiaro/scuro salvato tra le sessioni.
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") return "dark";
 
@@ -268,8 +278,11 @@ export default function App() {
 
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   });
+  // Mantiene l'ID della task trascinata per il drag-and-drop.
   const [draggedTaskId, setDraggedTaskId] = useState(null);
+  // Serve al quick-move mobile per capire da quale task iniziare lo spostamento.
   const [quickMoveSourceId, setQuickMoveSourceId] = useState(null);
+  // Riferimento all'input nascosto usato per importare un file JSON.
   const importInputRef = useRef(null);
 
   useEffect(() => {
@@ -282,14 +295,10 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    document.body.setAttribute("data-visual-style", visualStyle);
-    localStorage.setItem("visualStyle", visualStyle);
-  }, [visualStyle]);
-
-  useEffect(() => {
     localStorage.setItem("sortMode", sortMode);
   }, [sortMode]);
 
+  // Aggiunge una nuova task in cima alla lista e la prepara per la visualizzazione.
   function addTask(text, dueDate) {
     const clean = text.trim();
     if (!clean) return;
@@ -306,6 +315,7 @@ export default function App() {
     setTasks((prev) => [newTask, ...prev.map((task, index) => ({ ...task, order: index + 1 }))]);
   }
 
+  // Cambia lo stato di completamento di una task.
   function toggleTask(id) {
     setTasks((prev) =>
       prev.map((task) =>
@@ -314,6 +324,7 @@ export default function App() {
     );
   }
 
+  // Elimina una task dopo conferma dell'utente.
   function deleteTask(id) {
     const ok = window.confirm("Vuoi davvero eliminare questa task?");
     if (!ok) return;
@@ -321,6 +332,7 @@ export default function App() {
     setTasks((prev) => prev.filter((task) => task.id !== id));
   }
 
+  // Modifica il testo e la scadenza di una task esistente.
   function editTask(id, newText, newDueDate) {
     const clean = newText.trim();
     if (!clean) return;
@@ -334,6 +346,7 @@ export default function App() {
     );
   }
 
+  // Aggiorna la priorità di una task.
   function changePriority(id, newPriority) {
     setTasks((prev) =>
       prev.map((task) =>
@@ -342,6 +355,7 @@ export default function App() {
     );
   }
 
+  // Ripristina i dati demo e resetta le impostazioni di vista.
   function resetTasks() {
     const ok = window.confirm("Vuoi ripristinare le task demo per il testing?");
     if (!ok) return;
@@ -354,6 +368,7 @@ export default function App() {
     setDraggedTaskId(null);
   }
 
+  // Svuota completamente la lista dopo conferma.
   function clearTasks() {
     const ok = window.confirm("Vuoi svuotare tutte le task e partire da zero?");
     if (!ok) return;
@@ -367,14 +382,12 @@ export default function App() {
     setDraggedTaskId(null);
   }
 
+  // Alterna tra tema chiaro e scuro.
   function toggleTheme() {
     setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark"));
   }
 
-  function toggleVisualStyle() {
-    setVisualStyle((prevStyle) => (prevStyle === "polished" ? "classic" : "polished"));
-  }
-
+  // Riordina due task tramite drag-and-drop nella vista manuale.
   function reorderTasks(fromId, toId) {
     const sourceId = Number(fromId);
     const targetId = Number(toId);
@@ -397,10 +410,12 @@ export default function App() {
     setDraggedTaskId(null);
   }
 
+  // Seleziona una task per lo spostamento rapido su mobile.
   function startQuickMove(id) {
     setQuickMoveSourceId((prev) => (prev === id ? null : id));
   }
 
+  // Inserisce una task sopra o sotto un'altra in modalità quick-move.
   function placeTaskRelative(sourceId, targetId, position) {
     const source = Number(sourceId);
     const target = Number(targetId);
@@ -431,6 +446,7 @@ export default function App() {
     setQuickMoveSourceId(null);
   }
 
+  // Esporta l'intera lista in un file JSON scaricabile.
   function exportTasks() {
     const payload = JSON.stringify(tasks, null, 2);
     const blob = new Blob([payload], { type: "application/json" });
@@ -442,6 +458,7 @@ export default function App() {
     URL.revokeObjectURL(url);
   }
 
+  // Importa una lista di task da un file JSON.
   function importTasks(event) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -463,24 +480,19 @@ export default function App() {
     reader.readAsText(file);
   }
 
+  // Restituisce la lista effettivamente visibile dopo filtro e ordinamento.
   const visibleTasks = useMemo(() => {
-    let filteredTasks = [];
-
-    switch (filter) {
-      case "due-soon":
-        filteredTasks = tasks.filter((task) => isDueSoon(task.dueDate, task.done));
-        break;
-      case "overdue":
-        filteredTasks = tasks.filter((task) => isOverdue(task.dueDate, task.done));
-        break;
-      default:
-        filteredTasks = tasks;
-        break;
-    }
+    const filteredTasks =
+      filter === "due-soon"
+        ? tasks.filter((task) => isDueSoon(task.dueDate, task.done))
+        : filter === "overdue"
+        ? tasks.filter((task) => isOverdue(task.dueDate, task.done))
+        : tasks;
 
     return sortTasks(filteredTasks, sortMode);
   }, [tasks, filter, sortMode]);
 
+  // Testi mostrati nel menu di ordinamento.
   const sortLabels = {
     manual: "Manuale",
     urgency: "Urgenza",
@@ -488,11 +500,13 @@ export default function App() {
     due: "Scadenza",
   };
 
+  // Applica un nuovo metodo di ordinamento e chiude il menu.
   function applySortMode(mode) {
     setSortMode(mode);
     setShowSortMenu(false);
   }
 
+  // Statistiche rapide per la barra informativa.
   const total = tasks.length;
   const completed = tasks.filter((task) => task.done).length;
   const todo = total - completed;
@@ -527,15 +541,6 @@ export default function App() {
         </div>
 
         <div className="actions">
-          <button
-            type="button"
-            className="action-ghost action-icon"
-            onClick={toggleVisualStyle}
-            aria-label={visualStyle === "polished" ? "Passa alla grafica base" : "Passa alla grafica nuova"}
-            title={visualStyle === "polished" ? "Grafica base" : "Grafica nuova"}
-          >
-            ◐
-          </button>
           <button type="button" className="action-theme" onClick={toggleTheme}>
             {theme === "dark" ? "☀️ Modalità chiara" : "🌙 Modalità scura"}
           </button>

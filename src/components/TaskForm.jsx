@@ -1,9 +1,12 @@
 import { useState } from "react";
 
+// Form semplice per creare una nuova task con testo e scadenza opzionale.
 export default function TaskForm({ onAddTask }) {
+  // Il testo della nuova task e la sua eventuale scadenza.
   const [text, setText] = useState("");
   const [dueDate, setDueDate] = useState("");
 
+  // Invia il form solo se il testo non è vuoto, poi pulisce i campi.
   function handleSubmit(e) {
     e.preventDefault();
     onAddTask(text, dueDate);

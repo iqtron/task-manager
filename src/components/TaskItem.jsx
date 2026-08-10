@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+// Helper locale per trattare in modo uniforme le date in formato YYYY-MM-DD.
 function parseDate(value) {
   if (!value) return null;
 
@@ -9,6 +10,7 @@ function parseDate(value) {
   return new Date(year, month - 1, day);
 }
 
+// Formatta una data in stile italiano per la UI.
 function formatDate(value) {
   const date = parseDate(value);
   if (!date) return "Nessuna scadenza";
@@ -20,6 +22,7 @@ function formatDate(value) {
   }).format(date);
 }
 
+// Controlla se una task è già in ritardo.
 function isOverdue(value, done) {
   if (!value || done) return false;
 
@@ -32,6 +35,7 @@ function isOverdue(value, done) {
   return dueDate < today;
 }
 
+// Restituisce uno stato visivo per aiutare a capire la scadenza della task.
 function getDueStatus(value, done) {
   if (!value || done) return null;
 
@@ -51,23 +55,28 @@ function getDueStatus(value, done) {
   return null;
 }
 
-function TaskItem({ task, onToggle, onDelete, onEdit, onPriorityChange, onReorderTask, onStartQuickMove, onPlaceTaskRelative, quickMoveSourceId, onDragStart, isDragging, draggedTaskId, isManualSort }) {
+// Singola task renderizzata con priorità, scadenza, modifica e azioni rapide.
+function TaskItem({ task, onToggle, onDelete, onEdit, onPriorityChange, onReorderTask, onStartQuickMove, onPlaceTaskRelative, quickMoveSourceId, onDragStart, isDragging, isManualSort }) {
+  // Stato locale per la modalità edit della task.
   const [isEditing, setIsEditing] = useState(false);
   const [draftText, setDraftText] = useState(task.text);
   const [draftDueDate, setDraftDueDate] = useState(task.dueDate ?? "");
 
+  // Inizia la modifica copiano il contenuto attuale nella form locale.
   function startEdit() {
     setDraftText(task.text);
     setDraftDueDate(task.dueDate ?? "");
     setIsEditing(true);
   }
 
+  // Annulla la modifica e ripristina il contenuto originale.
   function cancelEdit() {
     setDraftText(task.text);
     setDraftDueDate(task.dueDate ?? "");
     setIsEditing(false);
   }
 
+  // Salva la modifica solo se il testo non è vuoto.
   function saveEdit() {
     const text = draftText.trim();
     if (!text) return;

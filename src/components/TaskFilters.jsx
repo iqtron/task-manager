@@ -1,3 +1,4 @@
+// Barra dei filtri per vedere solo task in scadenza, scadute o tutte.
 function TaskFilters({ filter, setFilter }) {
   return (
     <div className="filters">
